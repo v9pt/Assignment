@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rappi Turbo // AI Purchasing Agent Cockpit</title>
+  <title>AI Purchasing Agent</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,22 +16,22 @@
       <div class="brand-section">
         <div class="brand-logo">
           <span class="logo-icon">⚡</span>
-          <span class="brand-name">RAPPI TURBO</span>
+          <span class="brand-name">BUYER AGENT</span>
         </div>
         <div class="brand-divider"></div>
         <div class="app-title-wrapper">
-          <h1 class="app-title">AI Buyer Agent Cockpit</h1>
-          <span class="version-tag">Multi-Agent Swarm (Claude 3.5 + Gemini 1.5)</span>
+          <h1 class="app-title">AI Buyer Agent</h1>
+          <span class="version-tag">Claude Sonnet 4 + Gemini 2.5 Flash</span>
         </div>
       </div>
       
       <div class="header-actions">
         <div class="system-status-chip">
           <span class="pulse-indicator"></span>
-          <span class="status-label">Autonomous ERP Connected</span>
+          <span class="status-label">ERP Connected</span>
         </div>
         <button id="btn-eval" class="btn btn-secondary">
-          <span class="btn-icon">🧪</span> Run Eval Suite
+          <span class="btn-icon">🧪</span> Run Evaluation
         </button>
         <button id="btn-reset" class="btn btn-outline">
           <span class="btn-icon">↺</span> Reset ERP Data
@@ -42,7 +42,7 @@
     <!-- SCENARIOS SELECTION GRID -->
     <section class="scenarios-bar">
       <div class="section-label-row">
-        <span class="section-label">SELECT PURCHASING SITUATION / SCENARIO:</span>
+        <span class="section-label">SELECT SCENARIO:</span>
         <span id="active-scenario-tag" class="badge badge-info">Active: Scenario 1</span>
       </div>
       <div class="scenario-cards-grid" id="scenario-cards-container">
@@ -111,7 +111,7 @@
 
             <div class="action-btn-row">
               <button id="btn-execute-agent" class="btn btn-primary btn-large">
-                <span class="btn-icon">⚡</span> Run Autonomous Agent Decision Cycle
+                <span class="btn-icon">⚡</span> Run Agent
               </button>
             </div>
           </div>
@@ -121,16 +121,16 @@
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
-              <span class="icon">🧠</span> Multi-Agent Decision Trace & Reasoning Stream
+              <span class="icon">🧠</span> Agent Trace
             </div>
             <span class="pulse-tag" id="agent-running-indicator" style="display: none;">
-              <span class="spinner"></span> Synthesizing Agents...
+              <span class="spinner"></span> Running...
             </span>
           </div>
           <div class="card-body">
             <div class="agent-timeline" id="agent-timeline-container">
               <div class="empty-trace-state">
-                Click <strong>"Run Autonomous Agent Decision Cycle"</strong> to trigger the multi-agent investigation.
+                Click <strong>"Run Agent"</strong> to start.
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@
         <div class="glass-card verdict-card" id="verdict-card">
           <div class="card-header">
             <div class="card-title">
-              <span class="icon">⚖️</span> Executive Buyer Verdict
+              <span class="icon">⚖️</span> Verdict
             </div>
             <div id="verdict-badge" class="badge badge-neutral">PENDING RUN</div>
           </div>
@@ -168,9 +168,9 @@
             </div>
 
             <div class="rationale-box">
-              <div class="rationale-title">Decision Rationale & Trade-off Analysis:</div>
+              <div class="rationale-title">Rationale:</div>
               <p id="verdict-rationale" class="rationale-text">
-                The agent has not run yet. Select a scenario and initiate the decision cycle.
+                Select a scenario and run the agent.
               </p>
             </div>
           </div>
@@ -180,21 +180,21 @@
         <div class="glass-card feedback-card">
           <div class="card-header">
             <div class="card-title">
-              <span class="icon">🔄</span> Feedback & Post-Action Validation Loop
+              <span class="icon">🔄</span> Post-Action Validation
             </div>
             <div id="feedback-status-badge" class="badge badge-neutral">UNVERIFIED</div>
           </div>
           <div class="card-body">
             <div class="feedback-explainer">
               <p id="feedback-details-text">
-                The feedback loop automatically audits ERP transaction integrity after any order action to verify physical storage preservation, budget balance compliance, and vendor acceptance.
+                After executing an order, the system checks that storage and budget remain non-negative and that the PO committed successfully.
               </p>
             </div>
             <div class="feedback-checks-list" id="feedback-checklist">
-              <div class="check-item"><span class="chk-icon">⚪</span> Pre-Execution Constraint Sentinel Gate</div>
-              <div class="check-item"><span class="chk-icon">⚪</span> Transactional ERP Commit Verification</div>
-              <div class="check-item"><span class="chk-icon">⚪</span> Post-Action Storage & Budget Headroom Audit</div>
-              <div class="check-item"><span class="chk-icon">⚪</span> Stockout Cliff Remediation Verification</div>
+              <div class="check-item"><span class="chk-icon">⚪</span> Constraint check passed</div>
+              <div class="check-item"><span class="chk-icon">⚪</span> PO committed to ERP</div>
+              <div class="check-item"><span class="chk-icon">⚪</span> Storage & budget still positive</div>
+              <div class="check-item"><span class="chk-icon">⚪</span> Coverage restored</div>
             </div>
           </div>
         </div>
@@ -203,7 +203,7 @@
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
-              <span class="icon">📦</span> ERP Purchase Orders & Transaction Ledger
+              <span class="icon">📦</span> Purchase Orders
             </div>
             <span class="badge badge-outline" id="active-pos-count">1 Active PO</span>
           </div>
@@ -234,11 +234,11 @@
     <div class="modal-backdrop" id="eval-modal" style="display: none;">
       <div class="modal-dialog">
         <div class="modal-header">
-          <h2>Automated Evaluation Benchmark</h2>
+          <h2>Evaluation Results</h2>
           <button class="modal-close" id="btn-close-modal">&times;</button>
         </div>
         <div class="modal-body" id="eval-modal-content">
-          <div class="eval-loading">Running test scenarios through evaluation engine...</div>
+          <div class="eval-loading">Running scenarios...</div>
         </div>
       </div>
     </div>

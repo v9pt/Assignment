@@ -167,7 +167,7 @@ async function runAgentCycle() {
   agentRunningIndicator.style.display = "inline-flex";
   agentTimelineContainer.innerHTML = `
     <div class="empty-trace-state">
-      <div class="spinner"></div> Initiating Multi-Agent Swarm (Claude 3.5 & Gemini 1.5)...
+      <div class="spinner"></div> Running specialist agents (Claude Sonnet 4 & Gemini 2.5 Flash)...
     </div>
   `;
 
@@ -199,7 +199,7 @@ function renderAgentTraces(traces) {
     let agentClass = "agent-claude";
     if (t.model.includes("Gemini")) agentClass = "agent-gemini";
     else if (t.agent_name.includes("Constraint")) agentClass = "agent-sentinel";
-    else if (t.agent_name.includes("Chief")) agentClass = "agent-orchestrator";
+    else if (t.agent_name.includes("Orchestrator")) agentClass = "agent-orchestrator";
 
     step.className = `agent-step-card ${agentClass}`;
     step.innerHTML = `

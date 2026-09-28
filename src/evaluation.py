@@ -1,13 +1,18 @@
 """
-Automated Evaluation Engine for AI Purchasing Agent.
-Assesses decision correctness, information retrieval completeness,
-constraint adherence, transactional action appropriateness,
-and feedback loop validation integrity.
+Evaluation harness.
+
+Runs each scenario through the purchasing agent and checks the outcome
+against a set of correctness criteria aligned with the assignment rubric:
+  - Was the decision correct?
+  - Did the agent obtain the necessary information?
+  - Did it respect constraints?
+  - Did it take the right action?
+  - Did it validate the result?
 """
-from typing import List, Dict, Any
+from typing import Dict, Any
 from src.erp_database import erp_db
 from src.agents.buyer_orchestrator import buyer_orchestrator
-from src.models import Scenario, DecisionReport
+from src.models import DecisionReport
 
 
 class EvaluationResult:
@@ -33,14 +38,14 @@ class EvaluationResult:
 
     @property
     def score_percentage(self) -> float:
-        criteria = [
+        checks = [
             self.decision_correct,
             self.info_obtained,
             self.constraints_respected,
             self.action_appropriate,
             self.validated_feedback
         ]
-        return round((sum(criteria) / len(criteria)) * 100, 1)
+        return round(sum(checks) / len(checks) * 100, 1)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -60,58 +65,55 @@ class EvaluationResult:
 
 
 async def evaluate_scenario(scenario_id: str) -> EvaluationResult:
-    """Run an isolated evaluation test on a specific scenario."""
+    """Run one scenario in isolation and grade the agent's decision."""
     erp_db.reset()
     scenario = erp_db.scenarios.get(scenario_id)
     if not scenario:
-        raise ValueError(f"Scenario {scenario_id} not found")
+        raise ValueError(f"Unknown scenario: {scenario_id}")
 
     report: DecisionReport = await buyer_orchestrator.run_purchasing_cycle(scenario)
 
-    traces_by_agent = {t.agent_name: t for t in report.agent_traces}
-    has_inv = "Inventory & Demand Specialist" in traces_by_agent
-    has_sourcing = "Sourcing & Supplier Specialist" in traces_by_agent
-    has_sentinel = "Constraint & Financial Sentinel" in traces_by_agent
+    # Check that all three specialist agents ran
+    agent_names = {t.agent_name for t in report.agent_traces}
+    info_obtained = (
+        "Inventory & Demand Analyst" in agent_names
+        and "Sourcing Specialist" in agent_names
+        and "Constraint Validator" in agent_names
+    )
 
-    info_obtained = has_inv and has_sourcing and has_sentinel
-
-    # Evaluate scenario specific correctness
     if scenario_id == "scenario_1":
-        # Must MODIFY, quantity should not exceed 266 units (max storage 3.2 m3 / 0.012 m3 = 266 units)
+        # Should MODIFY to ≤266 units (3.2 m3 / 0.012 m3 per unit)
         decision_correct = report.verdict == "MODIFY" and report.recommended_qty <= 266
         constraints_respected = report.recommended_qty * 0.012 <= 3.201
         action_appropriate = any(a["action"] == "CREATE_PURCHASE_ORDER" for a in report.actions_executed)
         validated_feedback = report.feedback_loop_passed
 
     elif scenario_id == "scenario_2":
-        # Must SPLIT_SOURCING, cover the 250 unit shortfall with secondary supplier
+        # Should split-source: update original PO + create recovery order
         decision_correct = report.verdict == "SPLIT_SOURCING" and report.recommended_qty == 250
         constraints_respected = report.supplier_id == "supp_valle_verde_express"
         action_appropriate = (
-            any(a["action"] == "MODIFY_EXISTING_PO" for a in report.actions_executed) and
-            any(a["action"] == "CREATE_PURCHASE_ORDER" for a in report.actions_executed)
+            any(a["action"] == "MODIFY_EXISTING_PO" for a in report.actions_executed)
+            and any(a["action"] == "CREATE_PURCHASE_ORDER" for a in report.actions_executed)
         )
         validated_feedback = report.feedback_loop_passed
 
     elif scenario_id == "scenario_3":
-        # Must MODIFY to expand order due to surge
+        # Should expand the order beyond the original recommendation
         decision_correct = report.verdict == "MODIFY" and report.recommended_qty > scenario.recommended_qty
         constraints_respected = True
         action_appropriate = any(a["action"] == "CREATE_PURCHASE_ORDER" for a in report.actions_executed)
         validated_feedback = report.feedback_loop_passed
 
     elif scenario_id == "scenario_4":
-        # Must REJECT and escalate
+        # Should reject and escalate
         decision_correct = report.verdict == "REJECT" and report.recommended_qty == 0
         constraints_respected = report.human_approval_required is True
-        action_appropriate = any(a["action"] == "HALT_PURCHASE_AND_ESCALATE" for a in report.actions_executed)
+        action_appropriate = any(a["action"] == "ESCALATE_TO_HUMAN" for a in report.actions_executed)
         validated_feedback = report.feedback_loop_passed
 
     else:
-        decision_correct = False
-        constraints_respected = False
-        action_appropriate = False
-        validated_feedback = False
+        decision_correct = constraints_respected = action_appropriate = validated_feedback = False
 
     return EvaluationResult(
         scenario_id=scenario.id,
@@ -131,18 +133,15 @@ async def evaluate_scenario(scenario_id: str) -> EvaluationResult:
 
 
 async def run_full_evaluation() -> Dict[str, Any]:
-    """Execute evaluation across all test scenarios."""
     results = []
     for sc_id in ["scenario_1", "scenario_2", "scenario_3", "scenario_4"]:
-        res = await evaluate_scenario(sc_id)
-        results.append(res.to_dict())
+        r = await evaluate_scenario(sc_id)
+        results.append(r.to_dict())
 
-    avg_score = round(sum(r["score_percentage"] for r in results) / len(results), 1)
-    all_passed = all(r["passed"] for r in results)
-
+    avg = round(sum(r["score_percentage"] for r in results) / len(results), 1)
     return {
-        "overall_evaluation_score": avg_score,
-        "overall_status": "PASSED" if all_passed else "NEEDS_ATTENTION",
+        "overall_evaluation_score": avg,
+        "overall_status": "PASSED" if all(r["passed"] for r in results) else "NEEDS_ATTENTION",
         "total_scenarios_evaluated": len(results),
         "results": results
     }

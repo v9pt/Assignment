@@ -1,6 +1,8 @@
 """
-Mock In-Memory ERP Database for Quick-Commerce Fulfillment Network.
-Provides stateful persistence during runtime with reset capability.
+In-memory mock ERP database.
+
+Holds fulfillment nodes, products, suppliers, purchase orders, and
+scenario definitions. Resets to a known state between test runs.
 """
 from typing import Dict, List, Optional
 from copy import deepcopy
@@ -37,9 +39,9 @@ class ERPDatabase:
                 name="São Paulo Pinheiros Dark Store",
                 location="São Paulo, Brazil",
                 total_storage_capacity_m3=25.0,
-                used_storage_capacity_m3=23.8,  # Only 1.2 m3 available (Bottleneck!)
+                used_storage_capacity_m3=23.8,  # 1.2 m3 available
                 monthly_budget=30000.0,
-                spent_budget=28800.0           # Only $1,200 available (Severe Budget Crunch!)
+                spent_budget=28800.0           # $1,200 available
             )
         }
 
@@ -50,7 +52,7 @@ class ERPDatabase:
                 name="Oat Milk Barista Edition 1L",
                 category="Dairy & Plant-Based Alternatives",
                 unit_cost=2.80,
-                unit_volume_m3=0.012,       # 12 liters volume footprint
+                unit_volume_m3=0.012,
                 shelf_life_days=90,
                 current_inventory=80,
                 daily_demand=45.0,
@@ -160,7 +162,7 @@ class ERPDatabase:
             )
         }
 
-        # Standard Scenarios defined from the assignment prompt
+        # Test scenarios
         self.scenarios: Dict[str, Scenario] = {
             "scenario_1": Scenario(
                 id="scenario_1",
@@ -232,7 +234,7 @@ class ERPDatabase:
         }
 
     def reset(self):
-        """Reset in-memory state to initial baseline."""
+        """Restore all data to the initial state."""
         self._init_data()
 
     def get_node(self, node_id: str) -> Optional[FulfillmentNode]:
@@ -256,5 +258,4 @@ class ERPDatabase:
         return pos
 
 
-# Global Singleton instance
 erp_db = ERPDatabase()

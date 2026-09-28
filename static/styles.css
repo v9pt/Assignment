@@ -6,8 +6,8 @@
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-accent: rgba(255, 68, 88, 0.4);
 
-  --accent-rappi: #ff4458;
-  --accent-rappi-glow: rgba(255, 68, 88, 0.25);
+  --accent-primary: #ff4458;
+  --accent-primary-glow: rgba(255, 68, 88, 0.25);
   --accent-cyan: #00d2ff;
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
@@ -79,7 +79,7 @@ body {
   font-weight: 800;
   letter-spacing: 0.5px;
   color: #fff;
-  box-shadow: 0 0 15px var(--accent-rappi-glow);
+  box-shadow: 0 0 15px var(--accent-primary-glow);
 }
 
 .brand-divider {
@@ -152,9 +152,9 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-rappi), #e02f43);
+  background: linear-gradient(135deg, var(--accent-primary), #e02f43);
   color: #fff;
-  box-shadow: 0 4px 14px var(--accent-rappi-glow);
+  box-shadow: 0 4px 14px var(--accent-primary-glow);
 }
 
 .btn-primary:hover {
@@ -237,7 +237,7 @@ body {
 
 .scenario-card.active {
   background: rgba(255, 68, 88, 0.08);
-  border-color: var(--accent-rappi);
+  border-color: var(--accent-primary);
   box-shadow: 0 0 20px rgba(255, 68, 88, 0.18);
 }
 
@@ -248,7 +248,7 @@ body {
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--accent-rappi);
+  background: var(--accent-primary);
 }
 
 .sc-header {
@@ -261,7 +261,7 @@ body {
 .sc-tag {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--accent-rappi);
+  color: var(--accent-primary);
   text-transform: uppercase;
 }
 
@@ -353,7 +353,7 @@ body {
 }
 
 .stat-value.highlight {
-  color: var(--accent-rappi);
+  color: var(--accent-primary);
 }
 
 .stat-value.warning {

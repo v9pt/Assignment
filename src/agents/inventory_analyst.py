@@ -1,10 +1,11 @@
 """
-Agent 1: Inventory & Demand Intelligence Specialist (Powered by Gemini)
-Role: Deep telemetry research, sales velocity analysis, burn-rate calculation,
-forecast anomaly detection, and days-of-coverage (DOC) modeling.
+Agent 1 — Inventory & demand analysis.
+
+Pulls current stock levels and sales velocity from the ERP, then asks
+Gemini to assess whether a given replenishment recommendation is
+reasonable or needs adjustment.
 """
 import json
-from typing import Dict, Any
 from src.llm_client import llm_client
 from src.erp_tools import get_inventory_and_forecast
 from src.models import AgentTraceStep
@@ -12,9 +13,9 @@ from src.models import AgentTraceStep
 
 class InventoryAnalystAgent:
     def __init__(self):
-        self.name = "Inventory & Demand Specialist"
-        self.role = "Demand Forecasting & Burn Rate Telemetry"
-        self.model = "Google Gemini 1.5 Pro"
+        self.name = "Inventory & Demand Analyst"
+        self.role = "Demand forecasting & burn-rate analysis"
+        self.model = "Gemini 2.5 Flash"
 
     async def analyze(
         self,
@@ -23,62 +24,58 @@ class InventoryAnalystAgent:
         recommended_qty: int,
         context_notes: str = ""
     ) -> AgentTraceStep:
-        # 1. Fetch live telemetry from ERP
         telemetry = get_inventory_and_forecast(product_id, node_id)
 
-        # 2. Build Prompt for Gemini
         system_prompt = (
-            "You are an expert Inventory & Demand Intelligence AI for a quick-commerce network. "
-            "Your objective is to critically audit incoming replenishment recommendations. "
-            "Never assume recommendations are correct. Calculate burn rates, days of coverage (DOC), "
-            "spoilage risks, and determine the exact mathematically justified replenishment need."
+            "You are an inventory analyst for a quick-commerce fulfillment network. "
+            "Audit the incoming replenishment recommendation: calculate burn rates, "
+            "days of coverage, and flag any spoilage or stockout risk. "
+            "Return a JSON object."
         )
 
         user_prompt = f"""
-Current Inventory Telemetry:
+Inventory telemetry:
 {json.dumps(telemetry, indent=2)}
 
-Initial Purchasing System Recommendation: {recommended_qty} units
-Context Notes: {context_notes}
+Recommended purchase: {recommended_qty} units
+Context: {context_notes}
 
-Analyze this situation:
-1. Is the recommended quantity ({recommended_qty} units) mathematically sound, an over-order, or an under-order?
-2. What are the Current Days of Coverage (DOC) vs Target DOC?
-3. What is the stockout risk or spoilage risk?
-4. What is your calibrated demand recommendation?
+Questions:
+1. Is {recommended_qty} units justified, too high, or too low?
+2. Current days of coverage vs target?
+3. Stockout or spoilage risk?
+4. Your adjusted quantity recommendation?
 
-Respond in structured JSON format with keys:
-- analysis (str)
-- healthy_coverage_target_days (float)
-- adjusted_demand_need (int)
-- stockout_risk_score (float 0.0-1.0)
-- justification (str)
+Return JSON with keys: analysis, healthy_coverage_target_days,
+adjusted_demand_need, stockout_risk_score (0-1), justification.
 """
-        response_text = await llm_client.call_gemini(system_prompt, user_prompt)
+        raw = await llm_client.call_gemini(system_prompt, user_prompt)
 
         try:
-            findings = json.loads(response_text)
+            findings = json.loads(raw)
         except Exception:
             findings = {
-                "raw_response": response_text,
+                "raw_response": raw,
                 "adjusted_demand_need": recommended_qty,
                 "stockout_risk_score": 0.5
             }
 
-        thought_summary = (
-            f"Audited recommendation of {recommended_qty} units against current inventory ({telemetry.get('current_inventory')} units) "
-            f"and daily sales velocity ({telemetry.get('daily_demand_units')} units/day). "
-            f"Calibrated replenishment target: {findings.get('adjusted_demand_need', recommended_qty)} units."
+        adjusted = findings.get("adjusted_demand_need", recommended_qty)
+        thought = (
+            f"Checked {recommended_qty}-unit recommendation against "
+            f"{telemetry.get('current_inventory')} on-hand / "
+            f"{telemetry.get('daily_demand_units')} units/day velocity. "
+            f"Adjusted target: {adjusted} units."
         )
 
         return AgentTraceStep(
             agent_name=self.name,
             role=self.role,
             model=self.model,
-            thought=thought_summary,
+            thought=thought,
             findings={
                 "erp_telemetry": telemetry,
-                "gemini_intelligence": findings
+                "demand_analysis": findings
             },
             recommendation=str(findings.get("justification", findings.get("analysis", "")))
         )

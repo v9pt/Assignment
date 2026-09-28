@@ -1,20 +1,21 @@
 """
-Agent 3: Constraint & Financial Risk Sentinel (Deterministic Mathematical Core)
-Role: Enforces strict physical warehouse space (m3), monthly purchasing budget limits,
-supplier MOQ thresholds, and perishable shelf-life boundaries.
+Agent 3 — Constraint validation (deterministic, no LLM).
+
+Checks whether a proposed order quantity fits within the node's physical
+storage capacity, remaining budget, supplier MOQ, and shelf-life limits.
+Returns a structured pass/fail result with violation details.
 """
-from typing import Dict, Any, Optional
 from src.erp_tools import get_node_constraints, validate_purchase_order_constraints
 from src.models import AgentTraceStep, ValidationResult
 
 
-class ConstraintSentinelAgent:
+class ConstraintValidatorAgent:
     def __init__(self):
-        self.name = "Constraint & Financial Sentinel"
-        self.role = "Deterministic Capacity & Budget Guardrail"
-        self.model = "Mathematical Constraint Solver & Safety Guard"
+        self.name = "Constraint Validator"
+        self.role = "Storage, budget, and MOQ checks"
+        self.model = "Deterministic (rule-based)"
 
-    def audit_constraints(
+    def validate(
         self,
         product_id: str,
         node_id: str,
@@ -22,34 +23,38 @@ class ConstraintSentinelAgent:
         target_quantity: int
     ) -> AgentTraceStep:
         node_status = get_node_constraints(node_id)
-        validation: ValidationResult = validate_purchase_order_constraints(
+        result: ValidationResult = validate_purchase_order_constraints(
             product_id=product_id,
             node_id=node_id,
             supplier_id=supplier_id,
             quantity=target_quantity
         )
 
-        thought_summary = (
-            f"Audited {target_quantity} units against Node '{node_status.get('node_name')}'. "
-            f"Available Storage: {node_status.get('available_storage_m3')} m3 | "
-            f"Available Budget: ${node_status.get('available_budget'):,}. "
-            f"Constraint Status: {'PASSED [OK]' if validation.is_valid else 'VIOLATION DETECTED [REJECT/REMEDIATE]'}."
+        status_label = "PASS" if result.is_valid else "FAIL"
+        thought = (
+            f"Validated {target_quantity} units against {node_status.get('node_name')}: "
+            f"storage {node_status.get('available_storage_m3')} m3, "
+            f"budget ${node_status.get('available_budget'):,.0f}. "
+            f"Result: {status_label}."
         )
 
         return AgentTraceStep(
             agent_name=self.name,
             role=self.role,
             model=self.model,
-            thought=thought_summary,
+            thought=thought,
             findings={
                 "node_status": node_status,
-                "is_valid": validation.is_valid,
-                "budget_ok": validation.budget_ok,
-                "storage_ok": validation.storage_ok,
-                "moq_ok": validation.moq_ok,
-                "shelf_life_ok": validation.shelf_life_ok,
-                "violations": validation.violations,
-                "remediation_suggestion": validation.remediation_suggestion
+                "is_valid": result.is_valid,
+                "budget_ok": result.budget_ok,
+                "storage_ok": result.storage_ok,
+                "moq_ok": result.moq_ok,
+                "shelf_life_ok": result.shelf_life_ok,
+                "violations": result.violations,
+                "remediation_suggestion": result.remediation_suggestion
             },
-            recommendation=validation.remediation_suggestion or "All physical and fiscal constraints satisfied."
+            recommendation=(
+                result.remediation_suggestion
+                or "All constraints satisfied."
+            )
         )
