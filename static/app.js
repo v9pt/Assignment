@@ -286,7 +286,6 @@ async function resetERPData() {
   await refreshERPState();
   renderScenarioView(activeScenarioId);
   resetDecisionView();
-  alert("ERP Database has been reset to baseline test state.");
 }
 
 // Run Evaluation Suite

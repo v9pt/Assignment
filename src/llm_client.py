@@ -150,8 +150,9 @@ class LLMClient:
 
     def _fallback_claude(self, system_prompt: str, user_prompt: str) -> str:
         prompt_lower = user_prompt.lower()
+        sys_lower = system_prompt.lower()
 
-        if "sourcing" in system_prompt.lower():
+        if "sourcing" in sys_lower or "procurement" in sys_lower or "supplier" in sys_lower:
             if "avocado" in prompt_lower or "prod_avocado" in prompt_lower:
                 return json.dumps({
                     "recommended_supplier_id": "supp_valle_verde_express",
@@ -164,6 +165,19 @@ class LLMClient:
                         "Primary supplier can only deliver 250 units. Valle Verde has a "
                         "1-day lead time and 100-unit MOQ — best option to close the gap "
                         "at a $0.35/unit premium."
+                    )
+                })
+            if "coffee" in prompt_lower or "prod_premium_coffee" in prompt_lower:
+                return json.dumps({
+                    "recommended_supplier_id": "supp_andes_roasters",
+                    "supplier_name": "Andes Specialty Roasters",
+                    "allocation_strategy": "DEMAND_SURGE_EXPANSION",
+                    "allocated_quantity": 150,
+                    "unit_price": 7.50,
+                    "lead_time_days": 4,
+                    "rationale": (
+                        "Surge demand requires 150 units. Andes Specialty Roasters is the certified "
+                        "origin supplier with 4-day lead time and 100-unit MOQ."
                     )
                 })
             return json.dumps({
