@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rappi Turbo // AI Purchasing Agent Cockpit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- TOP NAVIGATION / BRAND HEADER -->
+    <header class="top-nav">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="brand-name">RAPPI TURBO</span>
+        </div>
+        <div class="brand-divider"></div>
+        <div class="app-title-wrapper">
+          <h1 class="app-title">AI Buyer Agent Cockpit</h1>
+          <span class="version-tag">Multi-Agent Swarm (Claude 3.5 + Gemini 1.5)</span>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="system-status-chip">
+          <span class="pulse-indicator"></span>
+          <span class="status-label">Autonomous ERP Connected</span>
+        </div>
+        <button id="btn-eval" class="btn btn-secondary">
+          <span class="btn-icon">🧪</span> Run Eval Suite
+        </button>
+        <button id="btn-reset" class="btn btn-outline">
+          <span class="btn-icon">↺</span> Reset ERP Data
+        </button>
+      </div>
+    </header>
+
+    <!-- SCENARIOS SELECTION GRID -->
+    <section class="scenarios-bar">
+      <div class="section-label-row">
+        <span class="section-label">SELECT PURCHASING SITUATION / SCENARIO:</span>
+        <span id="active-scenario-tag" class="badge badge-info">Active: Scenario 1</span>
+      </div>
+      <div class="scenario-cards-grid" id="scenario-cards-container">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- MAIN TWO-COLUMN WORKSPACE -->
+    <main class="cockpit-grid">
+      <!-- LEFT COLUMN: ERP TELEMETRY & MULTI-AGENT TRACE -->
+      <div class="grid-column column-left">
+        <!-- TELEMETRY & PHYSICAL CONSTRAINTS CARD -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">📊</span> Node & Inventory Telemetry
+            </div>
+            <div class="card-badge" id="node-name-badge">CDMX Roma Hub</div>
+          </div>
+          <div class="card-body">
+            <div class="telemetry-stats-grid">
+              <div class="stat-box">
+                <span class="stat-label">On-Hand Stock</span>
+                <span class="stat-value" id="stat-stock">80 units</span>
+                <span class="stat-sub">Safety Stock: 90 units</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">Daily Sales Velocity</span>
+                <span class="stat-value" id="stat-velocity">45 units/day</span>
+                <span class="stat-sub">7d Forecast: 315 units</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">Current Days Coverage</span>
+                <span class="stat-value warning" id="stat-doc">1.8 Days</span>
+                <span class="stat-sub">Stockout Threshold: 2.5d</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">System Recommendation</span>
+                <span class="stat-value highlight" id="stat-recom">800 units</span>
+                <span class="stat-sub" id="stat-recom-sub">Untrusted Source</span>
+              </div>
+            </div>
+
+            <!-- PHYSICAL & BUDGET UTILIZATION GAUGES -->
+            <div class="gauges-container">
+              <div class="gauge-item">
+                <div class="gauge-label-row">
+                  <span>Warehouse Storage Headroom</span>
+                  <span id="gauge-storage-text" class="gauge-val">3.20 m³ available / 15.0 m³</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-fill fill-storage" id="gauge-storage-bar" style="width: 78.6%;"></div>
+                </div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-label-row">
+                  <span>Monthly Working Capital Budget</span>
+                  <span id="gauge-budget-text" class="gauge-val">$3,500.00 available / $25,000</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-fill fill-budget" id="gauge-budget-bar" style="width: 86.0%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-btn-row">
+              <button id="btn-execute-agent" class="btn btn-primary btn-large">
+                <span class="btn-icon">⚡</span> Run Autonomous Agent Decision Cycle
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4-AGENT COLLABORATION THINKING STREAM -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">🧠</span> Multi-Agent Decision Trace & Reasoning Stream
+            </div>
+            <span class="pulse-tag" id="agent-running-indicator" style="display: none;">
+              <span class="spinner"></span> Synthesizing Agents...
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="agent-timeline" id="agent-timeline-container">
+              <div class="empty-trace-state">
+                Click <strong>"Run Autonomous Agent Decision Cycle"</strong> to trigger the multi-agent investigation.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: DECISION REPORT, FEEDBACK LOOP & PO EXECUTION -->
+      <div class="grid-column column-right">
+        <!-- EXECUTIVE VERDICT & RATIONALE -->
+        <div class="glass-card verdict-card" id="verdict-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">⚖️</span> Executive Buyer Verdict
+            </div>
+            <div id="verdict-badge" class="badge badge-neutral">PENDING RUN</div>
+          </div>
+          <div class="card-body">
+            <div class="verdict-summary-box">
+              <div class="verdict-metric">
+                <span class="label">Approved Order Qty</span>
+                <span class="value" id="verdict-final-qty">--</span>
+              </div>
+              <div class="verdict-metric">
+                <span class="label">Selected Supplier</span>
+                <span class="value" id="verdict-supplier">--</span>
+              </div>
+              <div class="verdict-metric">
+                <span class="label">Total Committed Cost</span>
+                <span class="value" id="verdict-cost">--</span>
+              </div>
+              <div class="verdict-metric">
+                <span class="label">Storage Footprint</span>
+                <span class="value" id="verdict-volume">--</span>
+              </div>
+            </div>
+
+            <div class="rationale-box">
+              <div class="rationale-title">Decision Rationale & Trade-off Analysis:</div>
+              <p id="verdict-rationale" class="rationale-text">
+                The agent has not run yet. Select a scenario and initiate the decision cycle.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FEEDBACK & VALIDATION LOOP (KEY ASSIGNMENT CRITERION) -->
+        <div class="glass-card feedback-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">🔄</span> Feedback & Post-Action Validation Loop
+            </div>
+            <div id="feedback-status-badge" class="badge badge-neutral">UNVERIFIED</div>
+          </div>
+          <div class="card-body">
+            <div class="feedback-explainer">
+              <p id="feedback-details-text">
+                The feedback loop automatically audits ERP transaction integrity after any order action to verify physical storage preservation, budget balance compliance, and vendor acceptance.
+              </p>
+            </div>
+            <div class="feedback-checks-list" id="feedback-checklist">
+              <div class="check-item"><span class="chk-icon">⚪</span> Pre-Execution Constraint Sentinel Gate</div>
+              <div class="check-item"><span class="chk-icon">⚪</span> Transactional ERP Commit Verification</div>
+              <div class="check-item"><span class="chk-icon">⚪</span> Post-Action Storage & Budget Headroom Audit</div>
+              <div class="check-item"><span class="chk-icon">⚪</span> Stockout Cliff Remediation Verification</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSACTIONAL ACTIONS EXECUTED & OPEN POS -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">📦</span> ERP Purchase Orders & Transaction Ledger
+            </div>
+            <span class="badge badge-outline" id="active-pos-count">1 Active PO</span>
+          </div>
+          <div class="card-body">
+            <div class="po-table-wrapper">
+              <table class="data-table" id="pos-table">
+                <thead>
+                  <tr>
+                    <th>PO Number</th>
+                    <th>Product</th>
+                    <th>Supplier</th>
+                    <th>Qty</th>
+                    <th>Total ($)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="pos-table-body">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- EVALUATION MODAL -->
+    <div class="modal-backdrop" id="eval-modal" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2>Automated Evaluation Benchmark</h2>
+          <button class="modal-close" id="btn-close-modal">&times;</button>
+        </div>
+        <div class="modal-body" id="eval-modal-content">
+          <div class="eval-loading">Running test scenarios through evaluation engine...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
